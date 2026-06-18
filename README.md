@@ -24,13 +24,18 @@ Grab the latest **`.dmg`** from the [**Releases**](../../releases/latest) page,
 open it, and drag **Patina** into **Applications**. It's a **universal** build —
 runs natively on Apple Silicon and Intel.
 
-> **First launch:** Patina is a free, unsigned build (it isn't notarized through a
-> paid Apple Developer account), so macOS will say it's from an unidentified
-> developer. Just **right-click Patina → Open → Open** once. Or clear the
-> quarantine flag from Terminal:
+> **First launch (important):** Patina is a free, unsigned build — it isn't
+> notarized through a paid Apple Developer account, so the first time you open it
+> macOS Gatekeeper blocks it with *"Apple could not verify Patina is free of
+> malware."* This is expected; **don't click Move to Bin.** Clear the quarantine
+> flag once, from Terminal:
 > ```sh
 > xattr -dr com.apple.quarantine /Applications/Patina.app
 > ```
+> then double-click Patina. **No Terminal?** Try to open it once, then go to
+> **System Settings → Privacy & Security**, scroll to *"Patina was blocked…"* and
+> click **Open Anyway**. (On macOS Sequoia/Tahoe the old right-click → Open trick
+> no longer works.)
 
 Prefer to compile it yourself? See [**Build**](#build) below.
 
