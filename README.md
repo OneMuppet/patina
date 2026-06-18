@@ -149,3 +149,7 @@ build.sh / install.sh
 ```
 
 Notes stay plain files; Patina is a thin, fast, native layer over a folder.
+
+## License
+
+[MIT](LICENSE) © 2026 David Borgenvik
