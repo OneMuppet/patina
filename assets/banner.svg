@@ -1,0 +1,38 @@
+<svg width="1200" height="360" viewBox="0 0 1200 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Patina — a fast, plain-text editor for any file">
+  <defs>
+    <linearGradient id="ink" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#211E1A"/>
+      <stop offset="1" stop-color="#141210"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="360" rx="32" fill="url(#ink)"/>
+  <rect x="0" y="0" width="1200" height="360" rx="32" fill="url(#sheen)"/>
+
+  <!-- Strata mark: lines of text / layers of patina; top bar is copper -->
+  <g transform="translate(108,97)">
+    <rect x="0" y="0"   width="172" height="28" rx="14" fill="#C7752E"/>
+    <rect x="0" y="46"  width="120" height="28" rx="14" fill="#EFE7D7"/>
+    <rect x="0" y="92"  width="148" height="28" rx="14" fill="#EFE7D7"/>
+    <rect x="0" y="138" width="80"  height="28" rx="14" fill="#EFE7D7"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="346" y="205"
+        font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif"
+        font-size="132" font-weight="700" letter-spacing="-3" fill="#EFE7D7">patina</text>
+
+  <!-- Tagline -->
+  <text x="350" y="252"
+        font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif"
+        font-size="29" font-weight="500" letter-spacing="0.3" fill="#A99B86">A fast, plain-text editor for any file.</text>
+
+  <!-- Values -->
+  <text x="350" y="298"
+        font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif"
+        font-size="20" font-weight="600" letter-spacing="3" fill="#C7752E">CLEAN &#183; HYPER-EFFICIENT &#183; NO BULLSHIT</text>
+</svg>
