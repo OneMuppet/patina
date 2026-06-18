@@ -33,3 +33,4 @@ xcuserdata/
 .env.*
 *.pem
 *.key
+dist/

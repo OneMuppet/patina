@@ -16,6 +16,24 @@ and shown a friendly notice instead of a screenful of garbage.
 Your files stay plain files. Patina never locks them in a database — it's a fast,
 beautiful lens over a directory you already own.
 
+## Download
+
+[![Download Patina for macOS](https://img.shields.io/badge/Download-Patina%20for%20macOS-C7752E?style=for-the-badge)](../../releases/latest)
+
+Grab the latest **`.dmg`** from the [**Releases**](../../releases/latest) page,
+open it, and drag **Patina** into **Applications**. It's a **universal** build —
+runs natively on Apple Silicon and Intel.
+
+> **First launch:** Patina is a free, unsigned build (it isn't notarized through a
+> paid Apple Developer account), so macOS will say it's from an unidentified
+> developer. Just **right-click Patina → Open → Open** once. Or clear the
+> quarantine flag from Terminal:
+> ```sh
+> xattr -dr com.apple.quarantine /Applications/Patina.app
+> ```
+
+Prefer to compile it yourself? See [**Build**](#build) below.
+
 ## Features
 
 - **Opens anything text** — Markdown renders beautifully; `.json`, `.yaml`/`.yml`,
