@@ -13,4 +13,10 @@ enum Persistence {
         get { d.url(forKey: "lastNote") }
         set { d.set(newValue, forKey: "lastNote") }
     }
+
+    /// Whether the first-run Welcome folder has been seeded.
+    static var didOnboard: Bool {
+        get { d.bool(forKey: "didOnboard") }
+        set { d.set(newValue, forKey: "didOnboard") }
+    }
 }

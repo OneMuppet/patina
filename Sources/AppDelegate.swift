@@ -14,7 +14,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSToolbarDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         buildWindow()
-        restoreState()
+        if !restoreState() && !Persistence.didOnboard {
+            // First run with nothing to restore — seed the Welcome note.
+            // Only mark done if it actually worked, so we retry next time.
+            if seedWelcomeAndOpen() { Persistence.didOnboard = true }
+        }
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -76,14 +80,86 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSToolbarDelegate {
         window = win
     }
 
-    private func restoreState() {
+    @discardableResult
+    private func restoreState() -> Bool {
         guard let folder = Persistence.lastFolder,
-              FileManager.default.fileExists(atPath: folder.path) else { return }
+              FileManager.default.fileExists(atPath: folder.path) else { return false }
         let note = Persistence.lastNote.flatMap {
             FileManager.default.fileExists(atPath: $0.path) ? $0 : nil
         }
         workspace.setFolder(folder, select: note)
+        return true
     }
+
+    /// First run: create ~/Patina, drop a Welcome note that showcases what the
+    /// app does, and open it — so a fresh install isn't an empty window. We use
+    /// the home root (not ~/Documents, which is privacy-gated and would block an
+    /// unsigned app's write). Onboarding is only marked done if it succeeds.
+    @discardableResult
+    private func seedWelcomeAndOpen() -> Bool {
+        let fm = FileManager.default
+        let folder = fm.homeDirectoryForCurrentUser.appendingPathComponent("Patina", isDirectory: true)
+        do {
+            try fm.createDirectory(at: folder, withIntermediateDirectories: true)
+        } catch {
+            return false
+        }
+        let welcome = folder.appendingPathComponent("Welcome.md")
+        if !fm.fileExists(atPath: welcome.path) {
+            try? Self.welcomeMarkdown.data(using: .utf8)?.write(to: welcome)
+        }
+        guard fm.fileExists(atPath: welcome.path) else { return false }
+        workspace.setFolder(folder, select: welcome)
+        return true
+    }
+
+    private static let welcomeMarkdown = """
+    # Welcome to Patina
+
+    A **fast**, *beautiful* home for plain text — Markdown renders cleanly, and
+    code blocks get real syntax highlighting. No web view, no database, just
+    plain files you own. This note lives in **~/Patina**.
+
+    ## What it does
+    - Live Markdown styling as you type: **bold**, *italic*, `inline code`
+    - Clickable [[wiki-links]] and #tags
+    - Quick-open any note with **⌘K**
+    - Opens `.md`, `.txt`, `.env`, `.json`, `.yaml` — and unknown files too
+
+    > Quiet, quick, to the bone.
+
+    ## A JSON paragraph
+
+    ```json
+    {
+      "app": "patina",
+      "fast": true,
+      "dependencies": 0,
+      "modes": ["markdown", "code"],
+      "token": null
+    }
+    ```
+
+    ## A YAML paragraph
+
+    ```yaml
+    name: patina
+    version: "1.0"
+    # native, zero dependencies
+    services:
+      editor:
+        fast: true
+        retries: 5
+    ```
+
+    ## Make it yours
+    - **⌘N** — new note · double-click a note's title to rename it
+    - **⌘⇧P** — toggle the rendered Markdown preview
+    - **⌘⇧O** — open a different folder of notes
+    - Drop your own `.md` / `.txt` / `.json` / `.env` files in this folder
+
+    Happy writing. 🤝
+    """
 
     // MARK: Toolbar
 
