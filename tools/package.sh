@@ -6,9 +6,9 @@ cd "$(dirname "$0")/.."
 
 APP_NAME="Patina"
 VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Resources/Info.plist 2>/dev/null || echo 1.0)"
-# Version the VOLUME name so Finder can't reuse a cached window layout from an
-# earlier "Patina" disk image (macOS caches DMG window state by volume name).
-VOLNAME="Patina $VERSION"
+# Distinct VOLUME name so Finder can't reuse a cached window layout from an
+# earlier disk image (macOS caches DMG window state by volume name).
+VOLNAME="Install Patina"
 DEPLOY="13.0"
 DIST="dist"
 APP="$DIST/$APP_NAME.app"
@@ -42,10 +42,11 @@ rm -f "$DMG"
 swiftc -O -framework AppKit -o "$DIST/_dmgbg" tools/gen_dmg_bg.swift && \
     "$DIST/_dmgbg" assets/dmg-bg.png && rm -f "$DIST/_dmgbg"
 
-if APP="$APP" python3 -m dmgbuild -s tools/dmg_settings.py "$VOLNAME" "$DMG" >/dev/null 2>&1; then
-    echo "  → styled dmg via dmgbuild"
+if APP="$APP" VOL="$VOLNAME" OUT="$DMG" BG="assets/dmg-bg.png" ICNS="Resources/AppIcon.icns" \
+        python3 tools/make_dmg.py >/dev/null 2>&1; then
+    echo "  → styled dmg (bookmark background, Retina, hidden files parked)"
 else
-    echo "  → dmgbuild unavailable; building a plain dmg (run: pip3 install --user dmgbuild)"
+    echo "  → styled build failed; plain dmg (needs: pip3 install --user ds_store mac_alias)"
     STAGE="$(mktemp -d)/Patina"
     mkdir -p "$STAGE"; cp -R "$APP" "$STAGE/"; ln -s /Applications "$STAGE/Applications"
     hdiutil create -volname "$VOLNAME" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
