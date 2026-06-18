@@ -30,8 +30,17 @@ cp Resources/Info.plist "$CONTENTS/Info.plist"
 [ -f Resources/AppIcon.icns ] && cp Resources/AppIcon.icns "$CONTENTS/Resources/AppIcon.icns"
 printf 'APPL????' > "$CONTENTS/PkgInfo"
 
-# Ad-hoc signature (no paid Developer ID — users clear quarantine on first open).
-codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
+# Sign the app. With a Developer ID in $SIGN_ID we use a hardened runtime +
+# secure timestamp (required for notarization); otherwise an ad-hoc signature
+# (users clear quarantine on first open).
+if [ -n "${SIGN_ID:-}" ]; then
+    echo "Signing with: $SIGN_ID"
+    codesign --force --options runtime --timestamp --sign "$SIGN_ID" "$CONTENTS/MacOS/$APP_NAME"
+    codesign --force --options runtime --timestamp --sign "$SIGN_ID" "$APP"
+    codesign --verify --strict --verbose=2 "$APP"
+else
+    codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
+fi
 
 # Styled .dmg (on-brand background, big icons, drag-to-Applications arrow).
 echo "Building dmg…"
