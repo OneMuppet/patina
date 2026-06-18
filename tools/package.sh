@@ -6,6 +6,9 @@ cd "$(dirname "$0")/.."
 
 APP_NAME="Patina"
 VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Resources/Info.plist 2>/dev/null || echo 1.0)"
+# Version the VOLUME name so Finder can't reuse a cached window layout from an
+# earlier "Patina" disk image (macOS caches DMG window state by volume name).
+VOLNAME="Patina $VERSION"
 DEPLOY="13.0"
 DIST="dist"
 APP="$DIST/$APP_NAME.app"
@@ -39,13 +42,13 @@ rm -f "$DMG"
 swiftc -O -framework AppKit -o "$DIST/_dmgbg" tools/gen_dmg_bg.swift && \
     "$DIST/_dmgbg" assets/dmg-bg.png && rm -f "$DIST/_dmgbg"
 
-if APP="$APP" python3 -m dmgbuild -s tools/dmg_settings.py "$APP_NAME" "$DMG" >/dev/null 2>&1; then
+if APP="$APP" python3 -m dmgbuild -s tools/dmg_settings.py "$VOLNAME" "$DMG" >/dev/null 2>&1; then
     echo "  → styled dmg via dmgbuild"
 else
     echo "  → dmgbuild unavailable; building a plain dmg (run: pip3 install --user dmgbuild)"
     STAGE="$(mktemp -d)/Patina"
     mkdir -p "$STAGE"; cp -R "$APP" "$STAGE/"; ln -s /Applications "$STAGE/Applications"
-    hdiutil create -volname "$APP_NAME" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
+    hdiutil create -volname "$VOLNAME" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
     rm -rf "$STAGE"
 fi
 
