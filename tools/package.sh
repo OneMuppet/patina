@@ -30,15 +30,24 @@ printf 'APPL????' > "$CONTENTS/PkgInfo"
 # Ad-hoc signature (no paid Developer ID — users clear quarantine on first open).
 codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
 
-# .dmg with a drag-to-Applications layout
+# Styled .dmg (on-brand background, big icons, drag-to-Applications arrow).
 echo "Building dmg…"
-STAGE="$(mktemp -d)/Patina"
-mkdir -p "$STAGE"
-cp -R "$APP" "$STAGE/"
-ln -s /Applications "$STAGE/Applications"
 DMG="$DIST/$APP_NAME-$VERSION-macos-universal.dmg"
-hdiutil create -volname "$APP_NAME" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
-rm -rf "$STAGE"
+rm -f "$DMG"
+
+# Refresh the install-window background image.
+swiftc -O -framework AppKit -o "$DIST/_dmgbg" tools/gen_dmg_bg.swift && \
+    "$DIST/_dmgbg" assets/dmg-bg.png && rm -f "$DIST/_dmgbg"
+
+if APP="$APP" python3 -m dmgbuild -s tools/dmg_settings.py "$APP_NAME" "$DMG" >/dev/null 2>&1; then
+    echo "  → styled dmg via dmgbuild"
+else
+    echo "  → dmgbuild unavailable; building a plain dmg (run: pip3 install --user dmgbuild)"
+    STAGE="$(mktemp -d)/Patina"
+    mkdir -p "$STAGE"; cp -R "$APP" "$STAGE/"; ln -s /Applications "$STAGE/Applications"
+    hdiutil create -volname "$APP_NAME" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
+    rm -rf "$STAGE"
+fi
 
 # .zip of the app
 ZIP="$DIST/$APP_NAME-$VERSION-macos-universal.zip"
