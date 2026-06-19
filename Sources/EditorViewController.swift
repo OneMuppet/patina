@@ -420,6 +420,23 @@ final class EditorViewController: NSViewController, NSTextViewDelegate, NSTextSt
         saveNow()
     }
 
+    /// ⌘S — Patina already autosaves, so this just flushes any pending change now
+    /// and shows a quiet confirmation (no error beep). No-ops silently with no note.
+    @objc func save(_ sender: Any?) {
+        guard currentURL != nil else { return }
+        flush()
+        flashSaved()
+    }
+
+    private var savedFlash: DispatchWorkItem?
+    private func flashSaved() {
+        footer.stringValue = "Saved ✓"
+        savedFlash?.cancel()
+        let work = DispatchWorkItem { [weak self] in self?.updateWordCount() }
+        savedFlash = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2, execute: work)
+    }
+
     // MARK: External-edit reconciliation
 
     /// Called when the folder watcher reports a change. If the open file changed

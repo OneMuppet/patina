@@ -222,6 +222,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSToolbarDelegate {
         let fileMenu = NSMenu(title: "File"); fileItem.submenu = fileMenu
         fileMenu.addItem(withTitle: "New Note", action: #selector(WorkspaceController.newNote(_:)), keyEquivalent: "n")
         fileMenu.addItem(withTitle: "Quick Open…", action: #selector(WorkspaceController.showPalette(_:)), keyEquivalent: "k")
+        fileMenu.addItem(withTitle: "Save", action: #selector(WorkspaceController.saveNote(_:)), keyEquivalent: "s")
         let openFolder = fileMenu.addItem(withTitle: "Open Notes Folder…", action: #selector(WorkspaceController.openFolder(_:)), keyEquivalent: "o")
         openFolder.keyEquivalentModifierMask = [.command, .shift]
         fileMenu.addItem(.separator())

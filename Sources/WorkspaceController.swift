@@ -143,6 +143,8 @@ final class WorkspaceController: NSSplitViewController, NSMenuItemValidation {
         view.window?.makeFirstResponder(editor.view)
     }
 
+    @objc func saveNote(_ sender: Any?) { editor.save(sender) }
+
     @objc func togglePreview(_ sender: Any?) { editor.togglePreview(sender) }
 
     @objc func searchNotes(_ sender: Any?) { sidebar.focusSearch() }
