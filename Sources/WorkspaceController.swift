@@ -111,6 +111,7 @@ final class WorkspaceController: NSSplitViewController, NSMenuItemValidation {
         let title = url.deletingPathExtension().lastPathComponent
         let trashURL = store.deleteNote(url)
         index.remove(url)
+        editor.discardUnsaved()   // it's deleted on purpose — don't write a recovery sidecar
         let next = store.notes.first?.url
         editor.load(next)
         if let next { sidebar.select(next, loadIt: false) }
@@ -166,7 +167,13 @@ final class WorkspaceController: NSSplitViewController, NSMenuItemValidation {
         view.window?.makeFirstResponder(editor.view)
     }
 
+    /// Plain flush (app losing focus): the note stays open, so the buffer is never
+    /// discarded — a conflict just leaves the banner up.
     func flushEditor() { editor.flush() }
+
+    /// Flush when the buffer is about to be discarded for good (quit): preserves
+    /// unsaved edits to a recovery sidecar if an external change blocks the save.
+    func flushForDiscard() { editor.flushForDiscard() }
 
     // MARK: Title
 

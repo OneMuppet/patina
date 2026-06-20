@@ -275,7 +275,9 @@ final class EditorViewController: NSViewController, NSTextViewDelegate, NSTextSt
     // MARK: Loading / saving
 
     func load(_ url: URL?) {
-        flush()
+        flushForDiscard()
+        let recoveryMessage = pendingRecoveryMessage
+        pendingRecoveryMessage = nil
         banner.dismiss()
         completer.dismiss()
         currentURL = url
@@ -312,6 +314,7 @@ final class EditorViewController: NSViewController, NSTextViewDelegate, NSTextSt
         refreshBacklinks()
         onTitleChange?()
         if previewVisible { renderPreview() }
+        if let recoveryMessage { showInfoBanner(recoveryMessage) }
     }
 
     private enum LoadResult { case text(String), binary, tooLarge(Int), unreadable }
@@ -396,15 +399,19 @@ final class EditorViewController: NSViewController, NSTextViewDelegate, NSTextSt
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6, execute: work)
     }
 
-    private func saveNow() {
-        guard isDirty, let url = currentURL else { return }
+    enum SaveResult { case saved, clean, conflict }
+
+    @discardableResult
+    private func saveNow() -> SaveResult {
+        guard isDirty, let url = currentURL else { return .clean }
         let (m, s) = stamp(url)
         if m != loadedMtime || s != loadedSize {
             // The file changed on disk while we held edits — don't clobber it.
             showConflictBanner(url)
-            return
+            return .conflict
         }
         writeBuffer(to: url)
+        return .saved
     }
 
     private func writeBuffer(to url: URL) {
@@ -415,17 +422,36 @@ final class EditorViewController: NSViewController, NSTextViewDelegate, NSTextSt
         isSaving = false
     }
 
-    func flush() {
+    @discardableResult
+    func flush() -> SaveResult {
         autosave?.cancel()
-        saveNow()
+        return saveNow()
     }
 
-    /// ⌘S — Patina already autosaves, so this just flushes any pending change now
-    /// and shows a quiet confirmation (no error beep). No-ops silently with no note.
+    /// Flush when the buffer is about to be discarded (switching notes, quitting).
+    /// If an external change blocks the save, write the in-memory text to a hidden
+    /// recovery sidecar so edits are never lost silently. Sets a message to surface.
+    func flushForDiscard() {
+        guard flush() == .conflict, let url = currentURL else { return }
+        let rec = url.deletingLastPathComponent()
+            .appendingPathComponent(".\(url.lastPathComponent).patina-recovery")
+        try? editorTextView.string.data(using: .utf8)?.write(to: rec)
+        isDirty = false   // preserved in the sidecar; safe to discard the buffer now
+        pendingRecoveryMessage = "“\(url.lastPathComponent)” changed on disk — your unsaved edits were kept in \(rec.lastPathComponent)"
+    }
+    private var pendingRecoveryMessage: String?
+
+    /// Drop unsaved edits without saving (e.g. the note was just deleted).
+    func discardUnsaved() { isDirty = false; autosave?.cancel() }
+
+    /// ⌘S — Patina already autosaves; this flushes now and confirms. On a conflict
+    /// it does NOT claim success — the Keep Mine / Reload banner stays up instead.
     @objc func save(_ sender: Any?) {
         guard currentURL != nil else { return }
-        flush()
-        flashSaved()
+        switch flush() {
+        case .saved, .clean: flashSaved()
+        case .conflict: break
+        }
     }
 
     private var savedFlash: DispatchWorkItem?

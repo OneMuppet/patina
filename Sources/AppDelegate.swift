@@ -37,7 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSToolbarDelegate {
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        workspace?.flushEditor()
+        workspace?.flushForDiscard()   // quitting discards the buffer — preserve on conflict
         return .terminateNow
     }
 
