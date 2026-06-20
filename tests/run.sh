@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 TMP="$(mktemp -d)"
 BIN="$TMP/patina-tests"
 
-swiftc -O -framework AppKit -o "$BIN" \
+swiftc -O -swift-version 5 -framework AppKit -o "$BIN" \
     tests/main.swift \
     Sources/Theme.swift \
     Sources/Markdown.swift \
