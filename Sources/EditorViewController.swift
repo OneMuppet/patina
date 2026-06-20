@@ -435,9 +435,14 @@ final class EditorViewController: NSViewController, NSTextViewDelegate, NSTextSt
         guard flush() == .conflict, let url = currentURL else { return }
         let rec = url.deletingLastPathComponent()
             .appendingPathComponent(".\(url.lastPathComponent).patina-recovery")
-        try? editorTextView.string.data(using: .utf8)?.write(to: rec)
-        isDirty = false   // preserved in the sidecar; safe to discard the buffer now
-        pendingRecoveryMessage = "“\(url.lastPathComponent)” changed on disk — your unsaved edits were kept in \(rec.lastPathComponent)"
+        let data = editorTextView.string.data(using: .utf8) ?? Data()
+        if (try? data.write(to: rec)) != nil {
+            isDirty = false   // preserved in the sidecar; safe to discard the buffer now
+            pendingRecoveryMessage = "“\(url.lastPathComponent)” changed on disk — your unsaved edits were kept in \(rec.lastPathComponent)"
+        } else {
+            // Be honest: don't claim the edits were saved if the write failed.
+            pendingRecoveryMessage = "“\(url.lastPathComponent)” changed on disk and your unsaved edits couldn't be written to a recovery file."
+        }
     }
     private var pendingRecoveryMessage: String?
 
