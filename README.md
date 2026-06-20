@@ -87,9 +87,11 @@ Prefer to compile it yourself? See [**Build**](#build) below.
 
 ```sh
 ./build.sh        # → build/Patina.app  (swiftc, no Xcode project)
+./tests/run.sh    # headless logic tests (store, index, highlighters)
 ```
 
 Requires the Swift toolchain (ships with Xcode / Command Line Tools).
+Every push builds the app and runs the tests in [CI](../../actions).
 
 ## Install + make it the default app
 
